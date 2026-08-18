@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+:root {
+  --crema: #FBF7F2;
+  --espresso: #2B211C;
+  --mocha: #8A7B6E;
+  --pistacchio: #3E7C59;
+  --pistacchio-scuro: #2E5C43;
+  --pistacchio-chiaro: #E3F0E7;
+  --fragola: #D6577A;
+  --fragola-scuro: #B33E5E;
+  --fragola-chiaro: #FBEAF0;
+  --miele: #D6A73E;
+  --miele-scuro: #B5872A;
+  --miele-chiaro: #FAECC5;
+  --blu-cielo: #5B7FD6;
+  --blu-cielo-chiaro: #DCE6FA;
+  --viola: #9B6FC4;
+  --viola-chiaro: #EAD9F5;
+  --bordo: #E8DFD3;
+  --bordo-chiaro: #F1ECE3;
+  --bianco: #FFFFFF;
+
+  --font-display: 'Fraunces', serif;
+  --font-corpo: 'Inter', sans-serif;
+  --font-dati: 'IBM Plex Mono', monospace;
+
+  --ombra-sm: 0 1px 2px rgba(43, 33, 28, 0.06);
+  --ombra-md: 0 4px 16px rgba(43, 33, 28, 0.08);
+  --ombra-lg: 0 8px 28px rgba(43, 33, 28, 0.12);
+  --raggio: 16px;
+  --raggio-piccolo: 10px;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--crema);
+  color: var(--espresso);
+  font-family: var(--font-corpo);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+button {
+  font-family: var(--font-corpo);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+input, select {
+  font-family: var(--font-corpo);
+}
+
+input:focus-visible, select:focus-visible, button:focus-visible {
+  outline: 2px solid var(--pistacchio);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bordo);
+  border-radius: 999px;
+}
+
+.scorrevole-orizzontale {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+@keyframes pulsa {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.caricamento-pulse {
+  animation: pulsa 1.3s ease-in-out infinite;
+}
+
+@keyframes comparsa {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.comparsa {
+  animation: comparsa 0.25s ease-out;
+}
