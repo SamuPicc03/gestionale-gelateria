@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { Card, EmptyState, ScheletroCaricamento, IntestazioneSezione, pulsanteFantasma, IconaCalendario } from './ui'
+import { useLingua } from '../i18n'
 
 const FASCE = ['mattina', 'pomeriggio', 'sera', 'riposo']
-const LABEL_FASCIA = { mattina: 'Mattina', pomeriggio: 'Pomeriggio', sera: 'Sera', riposo: 'Riposo' }
 const COLORE_FASCIA = { mattina: 'var(--miele)', pomeriggio: 'var(--blu-cielo)', sera: 'var(--viola)', riposo: 'var(--mocha)' }
 const COLORE_FASCIA_CHIARO = { mattina: 'var(--miele-chiaro)', pomeriggio: 'var(--blu-cielo-chiaro)', sera: 'var(--viola-chiaro)', riposo: 'var(--bordo-chiaro)' }
-const GIORNI_BREVI = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']
-const GIORNI_LABEL = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica']
 
 function inizioSettimana(data) {
   const d = new Date(data)
@@ -22,11 +20,6 @@ function formattaData(d) {
 
 function stessoGiorno(a, b) {
   return a.toDateString() === b.toDateString()
-}
-
-function formattaMeseAnno(data) {
-  const testo = data.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
-  return testo.charAt(0).toUpperCase() + testo.slice(1)
 }
 
 // Tutti i giorni da mostrare in griglia: dal lunedì della settimana del giorno 1
@@ -44,6 +37,16 @@ function generaGriglia(meseRif) {
 }
 
 export default function Turni({ azienda_id, puoGestire }) {
+  const { t, lingua } = useLingua()
+  const LABEL_FASCIA = { mattina: t('turni.mattina'), pomeriggio: t('turni.pomeriggio'), sera: t('turni.sera'), riposo: t('turni.riposo') }
+  const GIORNI_BREVI = t('turni.giorniBrevi')
+  const GIORNI_LABEL = t('turni.giorniLabel')
+
+  function formattaMeseAnno(data) {
+    const testo = data.toLocaleDateString(lingua === 'de' ? 'de-DE' : 'it-IT', { month: 'long', year: 'numeric' })
+    return testo.charAt(0).toUpperCase() + testo.slice(1)
+  }
+
   const [dipendenti, setDipendenti] = useState([])
   const [turni, setTurni] = useState({})
   const [mese, setMese] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
@@ -109,29 +112,29 @@ export default function Turni({ azienda_id, puoGestire }) {
 
   return (
     <div>
-      <IntestazioneSezione titolo="Turni" sottotitolo="Calendario mensile della squadra" />
+      <IntestazioneSezione titolo={t('turni.titolo')} sottotitolo={t('turni.sottotitolo')} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <button onClick={mesePrecedente} style={pulsanteFantasma}>← Mese prec.</button>
+        <button onClick={mesePrecedente} style={pulsanteFantasma}>{t('turni.mesePrec')}</button>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--espresso)' }}>
           {formattaMeseAnno(mese)}
         </span>
-        <button onClick={meseSuccessivo} style={pulsanteFantasma}>Mese succ. →</button>
+        <button onClick={meseSuccessivo} style={pulsanteFantasma}>{t('turni.meseSucc')}</button>
       </div>
 
       {caricamento && <ScheletroCaricamento righe={4} />}
 
       {!caricamento && dipendenti.length === 0 && (
-        <EmptyState icona={<IconaCalendario />} titolo="Nessun dipendente da pianificare"
-          sottotitolo="Aggiungi prima qualcuno nella sezione Dipendenti." />
+        <EmptyState icona={<IconaCalendario />} titolo={t('turni.nessunDipendente')}
+          sottotitolo={t('turni.aggiungiDipendenti')} />
       )}
 
       {!caricamento && dipendenti.length > 0 && (
         <>
           <Card style={{ padding: 10, marginBottom: 14 }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 6 }}>
-              {GIORNI_BREVI.map(g => (
-                <span key={g} style={{ textAlign: 'center', fontSize: 11, color: 'var(--mocha)', fontWeight: 600 }}>{g}</span>
+              {GIORNI_BREVI.map((g, i) => (
+                <span key={i} style={{ textAlign: 'center', fontSize: 11, color: 'var(--mocha)', fontWeight: 600 }}>{g}</span>
               ))}
             </div>
 
@@ -210,7 +213,7 @@ export default function Turni({ azienda_id, puoGestire }) {
                       </div>
                       {fasceAttive.length > 1 && (
                         <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--mocha)' }}>
-                          Turno spezzato: {fasceAttive.map(f => LABEL_FASCIA[f]).join(' + ')}
+                          {t('turni.turnoSpezzato')}: {fasceAttive.map(f => LABEL_FASCIA[f]).join(' + ')}
                         </p>
                       )}
                     </div>

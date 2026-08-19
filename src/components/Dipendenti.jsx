@@ -5,8 +5,11 @@ import {
   PulsanteIcona, IconaPersone, IconaPiu, IconaCestino,
 } from './ui'
 import { statoAttuale } from './timbratureUtils'
+import { useLingua } from '../i18n'
 
 export default function Dipendenti({ azienda_id, puoGestire }) {
+  const { t, lingua } = useLingua()
+  const locale = lingua === 'de' ? 'de-DE' : 'it-IT'
   const [dipendenti, setDipendenti] = useState([])
   const [ultimiEventi, setUltimiEventi] = useState({})
   const [caricamento, setCaricamento] = useState(true)
@@ -50,7 +53,7 @@ export default function Dipendenti({ azienda_id, puoGestire }) {
   }
 
   async function eliminaDipendente(id, nome) {
-    if (!window.confirm(`Rimuovere "${nome}" dai dipendenti?`)) return
+    if (!window.confirm(t('dipendenti.confermaRimuovi')(nome))) return
     setDipendenti(dipendenti.filter(d => d.id !== id))
     await supabase.from('dipendenti').delete().eq('id', id)
   }
@@ -58,10 +61,10 @@ export default function Dipendenti({ azienda_id, puoGestire }) {
   return (
     <div>
       <IntestazioneSezione
-        titolo="Dipendenti"
-        sottotitolo={caricamento ? undefined : `${dipendenti.length} persone in squadra`}
+        titolo={t('dipendenti.titolo')}
+        sottotitolo={caricamento ? undefined : `${dipendenti.length} ${t('dipendenti.persone')}`}
         azione={puoGestire && (
-          <PulsanteIcona titolo="Aggiungi dipendente" colore="var(--pistacchio)" onClick={aggiungiDipendente}>
+          <PulsanteIcona titolo={t('dipendenti.aggiungiDipendente')} colore="var(--pistacchio)" onClick={aggiungiDipendente}>
             <div style={{ width: 22, height: 22 }}><IconaPiu /></div>
           </PulsanteIcona>
         )}
@@ -72,10 +75,10 @@ export default function Dipendenti({ azienda_id, puoGestire }) {
       {!caricamento && dipendenti.length === 0 && (
         <EmptyState
           icona={<IconaPersone />}
-          titolo="Nessun dipendente ancora"
-          sottotitolo={puoGestire ? 'Aggiungi la prima persona della tua squadra.' : 'Chiedi a chi gestisce l\'attività di aggiungere i dipendenti.'}
+          titolo={t('dipendenti.nessunDipendente')}
+          sottotitolo={puoGestire ? t('dipendenti.aggiungiPrimaPersona') : t('dipendenti.chiediDipendenti')}
           azione={puoGestire && (
-            <button onClick={aggiungiDipendente} style={{ marginTop: 6, ...pulsanteAggiungiStile }}>+ Aggiungi dipendente</button>
+            <button onClick={aggiungiDipendente} style={{ marginTop: 6, ...pulsanteAggiungiStile }}>{t('dipendenti.pulsanteAggiungi')}</button>
           )}
         />
       )}
@@ -83,7 +86,7 @@ export default function Dipendenti({ azienda_id, puoGestire }) {
       {!caricamento && dipendenti.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {dipendenti.map(d => {
-            const stato = statoAttuale(ultimiEventi[d.id])
+            const stato = statoAttuale(ultimiEventi[d.id], locale)
             return (
               <Card key={d.id} style={{ padding: '10px 12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -91,25 +94,25 @@ export default function Dipendenti({ azienda_id, puoGestire }) {
                     disabled={!puoGestire}
                     style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 15, fontWeight: 500, color: 'var(--espresso)', padding: '8px 4px', minWidth: 0 }} />
                   {stato.alLavoro
-                    ? <Badge>Presente dalle {stato.dalle}</Badge>
-                    : <span style={{ fontSize: 12, color: 'var(--mocha)', flexShrink: 0 }}>Assente</span>}
+                    ? <Badge>{t('dipendenti.presenteDalle')} {stato.dalle}</Badge>
+                    : <span style={{ fontSize: 12, color: 'var(--mocha)', flexShrink: 0 }}>{t('dipendenti.assente')}</span>}
                   {!d.utente_id && (
-                    <Badge colore="var(--miele-scuro)" sfondo="var(--miele-chiaro)">Non collegato</Badge>
+                    <Badge colore="var(--miele-scuro)" sfondo="var(--miele-chiaro)">{t('dipendenti.nonCollegato')}</Badge>
                   )}
                   {puoGestire && (
-                    <PulsanteIcona titolo="Rimuovi dipendente" onClick={() => eliminaDipendente(d.id, d.nome)}>
+                    <PulsanteIcona titolo={t('dipendenti.rimuoviDipendente')} onClick={() => eliminaDipendente(d.id, d.nome)}>
                       <div style={{ width: 16, height: 16 }}><IconaCestino /></div>
                     </PulsanteIcona>
                   )}
                 </div>
                 {puoGestire && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 4px 2px' }}>
-                    <label style={{ fontSize: 12, color: 'var(--mocha)' }}>Costo orario</label>
+                    <label style={{ fontSize: 12, color: 'var(--mocha)' }}>{t('dipendenti.costoOrario')}</label>
                     <input type="number" min="0" step="0.5" value={d.costo_orario ?? ''}
                       placeholder="—"
                       onChange={e => aggiornaCostoOrario(d.id, e.target.value ? Number(e.target.value) : null)}
                       style={{ width: 64, fontFamily: 'var(--font-dati)', fontSize: 13, border: '1.5px solid var(--bordo)', borderRadius: 6, padding: '4px 6px' }} />
-                    <span style={{ fontSize: 12, color: 'var(--mocha)' }}>€/ora</span>
+                    <span style={{ fontSize: 12, color: 'var(--mocha)' }}>{t('comune.euroOra')}</span>
                   </div>
                 )}
               </Card>

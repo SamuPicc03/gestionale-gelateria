@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import Login from './components/Login'
+import SceltaLingua from './components/SceltaLingua'
 import SceltaSede from './components/SceltaSede'
 import Inventario from './components/Inventario'
 import Vendite from './components/Vendite'
@@ -9,24 +10,26 @@ import Timbratura from './components/Timbratura'
 import Turni from './components/Turni'
 import Fatture from './components/Fatture'
 import { IconaScatola, IconaGrafico, IconaPersone, IconaOrologio, IconaCalendario, IconaScontrino } from './components/ui'
+import { useLingua } from './i18n'
 
 const RUOLI_GESTIONE = ['responsabile', 'titolare', 'admin']
 const CHIAVE_SEDE_SALVATA = 'sede_attiva_azienda_id'
 
-const TUTTE_LE_SEZIONI = [
-  { id: 'inventario', label: 'Inventario', Icona: IconaScatola, soloGestione: true },
-  { id: 'vendite', label: 'Vendite', Icona: IconaGrafico, soloGestione: true },
-  { id: 'dipendenti', label: 'Dipendenti', Icona: IconaPersone, soloGestione: true },
-  { id: 'timbratura', label: 'Timbratura', Icona: IconaOrologio, soloGestione: false },
-  { id: 'turni', label: 'Turni', Icona: IconaCalendario, soloGestione: false },
-  { id: 'fatture', label: 'Fatture', Icona: IconaScontrino, soloGestione: true },
-]
-
 export default function App() {
+  const { t, lingua, linguaScelta, setLingua } = useLingua()
   const [session, setSession] = useState(undefined)
   const [sedi, setSedi] = useState(undefined)
   const [sedeAttiva, setSedeAttiva] = useState(null)
   const [tab, setTab] = useState(null)
+
+  const TUTTE_LE_SEZIONI = [
+    { id: 'inventario', label: t('app.tabInventario'), Icona: IconaScatola, soloGestione: true },
+    { id: 'vendite', label: t('app.tabVendite'), Icona: IconaGrafico, soloGestione: true },
+    { id: 'dipendenti', label: t('app.tabDipendenti'), Icona: IconaPersone, soloGestione: true },
+    { id: 'timbratura', label: t('app.tabTimbratura'), Icona: IconaOrologio, soloGestione: false },
+    { id: 'turni', label: t('app.tabTurni'), Icona: IconaCalendario, soloGestione: false },
+    { id: 'fatture', label: t('app.tabFatture'), Icona: IconaScontrino, soloGestione: true },
+  ]
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -68,13 +71,14 @@ export default function App() {
 
   if (session === undefined) return null
   if (!session) return <Login />
+  if (!linguaScelta) return <SceltaLingua onScegli={setLingua} />
   if (sedi === undefined) return <SchermataCaricamento />
 
   if (sedi.length === 0) {
     return (
       <SchermataMessaggio
-        titolo="Nessun accesso configurato"
-        messaggio="Il tuo utente non è ancora collegato a nessuna sede. Contatta chi gestisce l'attività."
+        titolo={t('app.nessunAccesso')}
+        messaggio={t('app.nessunAccessoMsg')}
       />
     )
   }
@@ -97,15 +101,20 @@ export default function App() {
       }}>
         <div>
           <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 19, color: 'var(--espresso)', margin: 0 }}>
-            Gestionale
+            {t('app.nomeApp')}
           </p>
-          {sedi.length > 1 && (
-            <button onClick={cambiaSede} style={pulsanteSede}>
-              {sedeAttiva.aziende?.nome || 'Sede'} · cambia
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {sedi.length > 1 && (
+              <button onClick={cambiaSede} style={pulsanteSede}>
+                {sedeAttiva.aziende?.nome || t('app.sede')} · {t('app.cambia')}
+              </button>
+            )}
+            <button onClick={() => setLingua(lingua === 'it' ? 'de' : 'it')} style={pulsanteSede} title="🇮🇹/🇩🇪">
+              {lingua === 'it' ? '🇮🇹' : '🇩🇪'}
             </button>
-          )}
+          </div>
         </div>
-        <button onClick={() => supabase.auth.signOut()} style={pulsanteEsci}>Esci</button>
+        <button onClick={() => supabase.auth.signOut()} style={pulsanteEsci}>{t('comune.esci')}</button>
       </header>
 
       <main style={{ flex: 1, width: '100%', maxWidth: 720, margin: '0 auto', padding: '1.25rem 1.25rem 5.5rem', boxSizing: 'border-box' }}>
@@ -148,22 +157,24 @@ export default function App() {
 }
 
 function SchermataCaricamento() {
+  const { t } = useLingua()
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p className="caricamento-pulse" style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--mocha)' }}>
-        Caricamento…
+        {t('app.caricamento')}
       </p>
     </div>
   )
 }
 
 function SchermataMessaggio({ titolo, messaggio }) {
+  const { t } = useLingua()
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
       <div>
         <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 20, color: 'var(--espresso)', margin: '0 0 8px' }}>{titolo}</p>
         <p style={{ fontSize: 14, color: 'var(--mocha)', margin: '0 0 20px', maxWidth: 320 }}>{messaggio}</p>
-        <button onClick={() => supabase.auth.signOut()} style={pulsanteEsci}>Esci</button>
+        <button onClick={() => supabase.auth.signOut()} style={pulsanteEsci}>{t('comune.esci')}</button>
       </div>
     </div>
   )

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { Card, EmptyState, ScheletroCaricamento, IntestazioneSezione, inputStyle, pulsantePrimario, pulsanteFantasma, IconaScontrino } from './ui'
+import { useLingua } from '../i18n'
 
 export default function Fatture({ azienda_id }) {
+  const { t } = useLingua()
   const [fatture, setFatture] = useState([])
   const [caricamentoLista, setCaricamentoLista] = useState(true)
   const [caricamento, setCaricamento] = useState(false)
@@ -32,7 +34,7 @@ export default function Fatture({ azienda_id }) {
         .from('fatture')
         .upload(nomeFile, file)
       if (uploadError) {
-        alert('Errore nel caricamento del PDF: ' + uploadError.message)
+        alert(t('fatture.erroreCaricamento') + uploadError.message)
         setCaricamento(false)
         return
       }
@@ -49,7 +51,7 @@ export default function Fatture({ azienda_id }) {
     })
 
     if (error) {
-      alert('Errore nel salvataggio: ' + error.message)
+      alert(t('fatture.erroreSalvataggio') + error.message)
     } else {
       setNuovaFattura({ fornitore: '', importo: '', data_fattura: '', scadenza: '' })
       setFile(null)
@@ -78,11 +80,11 @@ export default function Fatture({ azienda_id }) {
   return (
     <div>
       <IntestazioneSezione
-        titolo="Fatture"
-        sottotitolo={caricamentoLista ? undefined : `${fatture.length} registrate`}
+        titolo={t('fatture.titolo')}
+        sottotitolo={caricamentoLista ? undefined : `${fatture.length} ${t('fatture.registrate')}`}
         azione={
           <button onClick={() => setMostraForm(v => !v)} style={{ ...pulsanteFantasma, background: mostraForm ? 'var(--bordo-chiaro)' : 'var(--bianco)' }}>
-            {mostraForm ? 'Annulla' : '+ Nuova'}
+            {mostraForm ? t('fatture.annulla') : t('fatture.nuova')}
           </button>
         }
       />
@@ -90,12 +92,12 @@ export default function Fatture({ azienda_id }) {
       {!caricamentoLista && fatture.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: inScadenza.length ? '1fr 1fr' : '1fr', gap: 10, marginBottom: 16 }}>
           <Card style={{ padding: '14px 16px' }}>
-            <p style={{ margin: '0 0 4px', fontSize: 12, color: 'var(--mocha)', fontWeight: 500 }}>Totale registrato</p>
+            <p style={{ margin: '0 0 4px', fontSize: 12, color: 'var(--mocha)', fontWeight: 500 }}>{t('fatture.totaleRegistrato')}</p>
             <p style={{ margin: 0, fontFamily: 'var(--font-dati)', fontSize: 20, color: 'var(--espresso)' }}>{totale.toFixed(2)} €</p>
           </Card>
           {inScadenza.length > 0 && (
             <Card style={{ padding: '14px 16px', background: 'var(--miele-chiaro)', border: 'none' }}>
-              <p style={{ margin: '0 0 4px', fontSize: 12, color: 'var(--miele-scuro)', fontWeight: 600 }}>In scadenza 7gg</p>
+              <p style={{ margin: '0 0 4px', fontSize: 12, color: 'var(--miele-scuro)', fontWeight: 600 }}>{t('fatture.inScadenza7')}</p>
               <p style={{ margin: 0, fontFamily: 'var(--font-dati)', fontSize: 20, color: 'var(--espresso)' }}>{inScadenza.length}</p>
             </Card>
           )}
@@ -104,26 +106,26 @@ export default function Fatture({ azienda_id }) {
 
       {mostraForm && (
         <form onSubmit={handleUpload} style={{ ...cardStyleForm, padding: 16, marginBottom: '1.5rem' }}>
-          <p style={{ fontWeight: 600, marginTop: 0, marginBottom: 12, fontSize: 14, color: 'var(--espresso)' }}>Carica nuova fattura</p>
-          <input placeholder="Fornitore" value={nuovaFattura.fornitore}
+          <p style={{ fontWeight: 600, marginTop: 0, marginBottom: 12, fontSize: 14, color: 'var(--espresso)' }}>{t('fatture.caricaNuova')}</p>
+          <input placeholder={t('fatture.fornitore')} value={nuovaFattura.fornitore}
             onChange={e => setNuovaFattura({ ...nuovaFattura, fornitore: e.target.value })} required style={inputStyle} />
-          <input placeholder="Importo (€)" type="number" step="0.01" value={nuovaFattura.importo}
+          <input placeholder={t('fatture.importo')} type="number" step="0.01" value={nuovaFattura.importo}
             onChange={e => setNuovaFattura({ ...nuovaFattura, importo: e.target.value })} style={inputStyle} />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <div>
-              <label style={{ fontSize: 12, color: 'var(--mocha)' }}>Data fattura</label>
+              <label style={{ fontSize: 12, color: 'var(--mocha)' }}>{t('fatture.dataFattura')}</label>
               <input type="date" value={nuovaFattura.data_fattura}
                 onChange={e => setNuovaFattura({ ...nuovaFattura, data_fattura: e.target.value })} style={inputStyle} />
             </div>
             <div>
-              <label style={{ fontSize: 12, color: 'var(--mocha)' }}>Scadenza</label>
+              <label style={{ fontSize: 12, color: 'var(--mocha)' }}>{t('fatture.scadenza')}</label>
               <input type="date" value={nuovaFattura.scadenza}
                 onChange={e => setNuovaFattura({ ...nuovaFattura, scadenza: e.target.value })} style={inputStyle} />
             </div>
           </div>
           <input type="file" accept="application/pdf" onChange={e => setFile(e.target.files[0])} style={{ margin: '4px 0 14px', fontSize: 13 }} />
           <button type="submit" disabled={caricamento} style={pulsantePrimario('var(--fragola)')}>
-            {caricamento ? 'Caricamento…' : 'Salva fattura'}
+            {caricamento ? t('comune.caricamento') : t('fatture.salvaFattura')}
           </button>
         </form>
       )}
@@ -131,9 +133,9 @@ export default function Fatture({ azienda_id }) {
       {caricamentoLista && <ScheletroCaricamento righe={3} />}
 
       {!caricamentoLista && fatture.length === 0 && !mostraForm && (
-        <EmptyState icona={<IconaScontrino />} titolo="Nessuna fattura ancora"
-          sottotitolo="Carica il PDF di una fattura per iniziare a tracciarla."
-          azione={<button onClick={() => setMostraForm(true)} style={{ marginTop: 6, ...pulsantePrimarioPiccolo }}>+ Nuova fattura</button>} />
+        <EmptyState icona={<IconaScontrino />} titolo={t('fatture.nessunaFattura')}
+          sottotitolo={t('fatture.caricaPdf')}
+          azione={<button onClick={() => setMostraForm(true)} style={{ marginTop: 6, ...pulsantePrimarioPiccolo }}>{t('fatture.nuovaFattura')}</button>} />
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -142,7 +144,7 @@ export default function Fatture({ azienda_id }) {
             <div style={{ minWidth: 0 }}>
               <p style={{ fontWeight: 600, fontSize: 14, margin: 0, color: 'var(--espresso)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.fornitore}</p>
               <p style={{ fontSize: 12, color: 'var(--mocha)', margin: '2px 0 0' }}>
-                {f.data_fattura ? `Emessa il ${f.data_fattura}` : ''}{f.scadenza ? ` · Scade il ${f.scadenza}` : ''}
+                {f.data_fattura ? `${t('fatture.emessaIl')} ${f.data_fattura}` : ''}{f.scadenza ? ` · ${t('fatture.scadeIl')} ${f.scadenza}` : ''}
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>

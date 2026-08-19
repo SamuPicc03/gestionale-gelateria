@@ -4,8 +4,10 @@ import {
   Card, Badge, EmptyState, ScheletroCaricamento, IntestazioneSezione,
   PulsanteIcona, IconaScatola, IconaPiu, IconaCestino,
 } from './ui'
+import { useLingua } from '../i18n'
 
 export default function Inventario({ azienda_id, puoGestire }) {
+  const { t } = useLingua()
   const [prodotti, setProdotti] = useState([])
   const [caricamento, setCaricamento] = useState(true)
 
@@ -39,7 +41,7 @@ export default function Inventario({ azienda_id, puoGestire }) {
   }
 
   async function eliminaProdotto(id, nome) {
-    if (!window.confirm(`Eliminare "${nome}" dall'inventario?`)) return
+    if (!window.confirm(t('inventario.confermaElimina')(nome))) return
     setProdotti(prodotti.filter(p => p.id !== id))
     await supabase.from('prodotti').delete().eq('id', id)
   }
@@ -49,10 +51,10 @@ export default function Inventario({ azienda_id, puoGestire }) {
   return (
     <div>
       <IntestazioneSezione
-        titolo="Inventario"
-        sottotitolo={caricamento ? undefined : `${prodotti.length} prodotti`}
+        titolo={t('inventario.titolo')}
+        sottotitolo={caricamento ? undefined : `${prodotti.length} ${t('inventario.prodotti')}`}
         azione={puoGestire && (
-          <PulsanteIcona titolo="Aggiungi prodotto" colore="var(--pistacchio)" onClick={aggiungiProdotto}>
+          <PulsanteIcona titolo={t('inventario.aggiungiProdotto')} colore="var(--pistacchio)" onClick={aggiungiProdotto}>
             <div style={{ width: 22, height: 22 }}><IconaPiu /></div>
           </PulsanteIcona>
         )}
@@ -62,10 +64,10 @@ export default function Inventario({ azienda_id, puoGestire }) {
         <div style={{ marginBottom: 16 }}>
           {scortaBassaCount > 0 ? (
             <Badge colore="var(--fragola-scuro)" sfondo="var(--fragola-chiaro)">
-              {scortaBassaCount} {scortaBassaCount === 1 ? 'prodotto in scorta bassa' : 'prodotti in scorta bassa'}
+              {scortaBassaCount} {scortaBassaCount === 1 ? t('inventario.prodottoScortaBassa') : t('inventario.prodottiScortaBassa')}
             </Badge>
           ) : (
-            <Badge>Scorte a posto</Badge>
+            <Badge>{t('inventario.scorteAPosto')}</Badge>
           )}
         </div>
       )}
@@ -75,10 +77,10 @@ export default function Inventario({ azienda_id, puoGestire }) {
       {!caricamento && prodotti.length === 0 && (
         <EmptyState
           icona={<IconaScatola />}
-          titolo="Nessun prodotto ancora"
-          sottotitolo={puoGestire ? 'Aggiungi il primo gusto o prodotto del tuo magazzino.' : 'Chiedi a chi gestisce l\'attività di aggiungere i prodotti.'}
+          titolo={t('inventario.nessunProdotto')}
+          sottotitolo={puoGestire ? t('inventario.aggiungiPrimoProdotto') : t('inventario.chiediProdotti')}
           azione={puoGestire && (
-            <button onClick={aggiungiProdotto} style={{ marginTop: 6, ...pulsanteAggiungiStile }}>+ Aggiungi prodotto</button>
+            <button onClick={aggiungiProdotto} style={{ marginTop: 6, ...pulsanteAggiungiStile }}>{t('inventario.pulsanteAggiungi')}</button>
           )}
         />
       )}
@@ -91,7 +93,7 @@ export default function Inventario({ azienda_id, puoGestire }) {
               <Card key={p.id} style={{ padding: 16, position: 'relative' }}>
                 {puoGestire && (
                   <div style={{ position: 'absolute', top: 6, right: 6 }}>
-                    <PulsanteIcona titolo="Elimina prodotto" onClick={() => eliminaProdotto(p.id, p.nome)}>
+                    <PulsanteIcona titolo={t('inventario.eliminaProdotto')} onClick={() => eliminaProdotto(p.id, p.nome)}>
                       <div style={{ width: 16, height: 16 }}><IconaCestino /></div>
                     </PulsanteIcona>
                   </div>
@@ -102,7 +104,7 @@ export default function Inventario({ azienda_id, puoGestire }) {
                 <p style={{ fontFamily: 'var(--font-dati)', fontSize: 28, fontWeight: 500, margin: '0 0 6px', color: scortaBassa ? 'var(--fragola)' : 'var(--espresso)' }}>
                   {p.quantita}
                 </p>
-                {scortaBassa && <Badge colore="var(--fragola-scuro)" sfondo="var(--fragola-chiaro)">Scorta bassa</Badge>}
+                {scortaBassa && <Badge colore="var(--fragola-scuro)" sfondo="var(--fragola-chiaro)">{t('inventario.scortaBassa')}</Badge>}
                 <select value={p.quantita} onChange={e => aggiornaQuantita(p.id, Number(e.target.value))}
                   disabled={!puoGestire}
                   style={{ width: '100%', marginTop: 10, borderRadius: 8, border: '1.5px solid var(--bordo)', padding: '8px 10px', fontSize: 14 }}>

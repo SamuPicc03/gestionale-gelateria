@@ -8,13 +8,13 @@ export function fineMese(data) {
   return new Date(data.getFullYear(), data.getMonth() + 1, 0, 23, 59, 59)
 }
 
-export function formattaMese(data) {
-  const testo = data.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
+export function formattaMese(data, locale = 'it-IT') {
+  const testo = data.toLocaleDateString(locale, { month: 'long', year: 'numeric' })
   return testo.charAt(0).toUpperCase() + testo.slice(1)
 }
 
-export function formattaOrario(iso) {
-  return new Date(iso).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+export function formattaOrario(iso, locale = 'it-IT') {
+  return new Date(iso).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
 }
 
 // Formato richiesto da <input type="datetime-local">, in orario locale (non UTC)
@@ -40,7 +40,7 @@ export function calcolaOre(eventiOrdinatiAsc) {
   return Math.round((totaleMs / 3_600_000) * 10) / 10
 }
 
-export function statoAttuale(ultimoEvento) {
+export function statoAttuale(ultimoEvento, locale = 'it-IT') {
   if (!ultimoEvento || ultimoEvento.tipo === 'uscita') return { alLavoro: false }
-  return { alLavoro: true, dalle: formattaOrario(ultimoEvento.orario) }
+  return { alLavoro: true, dalle: formattaOrario(ultimoEvento.orario, locale) }
 }

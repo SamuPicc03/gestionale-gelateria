@@ -6,6 +6,7 @@ import {
   IconaCalendario, IconaCestino, IconaPiu,
 } from './ui'
 import { inizioMese, fineMese, formattaMese, perInputLocale, calcolaOre, statoAttuale } from './timbratureUtils'
+import { useLingua } from '../i18n'
 
 export default function Timbratura({ azienda_id, puoGestire, utenteId }) {
   return puoGestire
@@ -14,16 +15,19 @@ export default function Timbratura({ azienda_id, puoGestire, utenteId }) {
 }
 
 function NavigatoreMese({ mese, onCambia }) {
+  const { t, lingua } = useLingua()
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-      <button onClick={() => onCambia(-1)} style={pulsanteFantasma}>← Prec.</button>
-      <span style={{ fontSize: 13, color: 'var(--mocha)', fontWeight: 600 }}>{formattaMese(mese)}</span>
-      <button onClick={() => onCambia(1)} style={pulsanteFantasma}>Succ. →</button>
+      <button onClick={() => onCambia(-1)} style={pulsanteFantasma}>{t('comune.prec')}</button>
+      <span style={{ fontSize: 13, color: 'var(--mocha)', fontWeight: 600 }}>{formattaMese(mese, lingua === 'de' ? 'de-DE' : 'it-IT')}</span>
+      <button onClick={() => onCambia(1)} style={pulsanteFantasma}>{t('comune.succ')}</button>
     </div>
   )
 }
 
 function VistaPersonale({ azienda_id, utenteId }) {
+  const { t, lingua } = useLingua()
+  const locale = lingua === 'de' ? 'de-DE' : 'it-IT'
   const [caricamento, setCaricamento] = useState(true)
   const [mioDipendente, setMioDipendente] = useState(null)
   const [ultimoEvento, setUltimoEvento] = useState(null)
@@ -66,23 +70,23 @@ function VistaPersonale({ azienda_id, utenteId }) {
   if (!mioDipendente) {
     return (
       <div>
-        <IntestazioneSezione titolo="Timbratura" />
-        <EmptyState icona={<IconaCalendario />} titolo="Account non ancora collegato"
-          sottotitolo="Il tuo utente non risulta collegato a nessun dipendente. Chiedi a chi gestisce l'attività di collegarlo." />
+        <IntestazioneSezione titolo={t('timbratura.titolo')} />
+        <EmptyState icona={<IconaCalendario />} titolo={t('timbratura.accountNonCollegato')}
+          sottotitolo={t('timbratura.accountNonCollegatoMsg')} />
       </div>
     )
   }
 
-  const stato = statoAttuale(ultimoEvento)
+  const stato = statoAttuale(ultimoEvento, locale)
   const oreMese = calcolaOre(eventiMese)
 
   return (
     <div>
-      <IntestazioneSezione titolo="Timbratura" sottotitolo={mioDipendente.nome} />
+      <IntestazioneSezione titolo={t('timbratura.titolo')} sottotitolo={mioDipendente.nome} />
 
       <Card style={{ padding: '2rem 1.5rem', textAlign: 'center', marginBottom: 16 }}>
         <p style={{ margin: '0 0 4px', fontSize: 13, color: 'var(--mocha)' }}>
-          {stato.alLavoro ? `Al lavoro dalle ${stato.dalle}` : 'Fuori turno'}
+          {stato.alLavoro ? `${t('timbratura.alLavoroDalle')} ${stato.dalle}` : t('timbratura.fuoriTurno')}
         </p>
         <button
           onClick={() => timbra(stato.alLavoro ? 'uscita' : 'entrata')}
@@ -92,14 +96,14 @@ function VistaPersonale({ azienda_id, utenteId }) {
             width: 180, height: 180, borderRadius: '50%', fontSize: 20, margin: '12px auto 0',
           }}
         >
-          {stato.alLavoro ? 'Segna uscita' : 'Segna entrata'}
+          {stato.alLavoro ? t('timbratura.segnaUscita') : t('timbratura.segnaEntrata')}
         </button>
       </Card>
 
       <NavigatoreMese mese={mese} onCambia={d => setMese(m => new Date(m.getFullYear(), m.getMonth() + d, 1))} />
 
       <Card style={{ padding: '18px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 13, color: 'var(--mocha)', fontWeight: 500 }}>Ore totali del mese</span>
+        <span style={{ fontSize: 13, color: 'var(--mocha)', fontWeight: 500 }}>{t('timbratura.oreTotaliMese')}</span>
         <span style={{ fontFamily: 'var(--font-dati)', fontSize: 24, color: 'var(--espresso)', fontWeight: 500 }}>{oreMese}</span>
       </Card>
     </div>
@@ -107,6 +111,8 @@ function VistaPersonale({ azienda_id, utenteId }) {
 }
 
 function VistaGestione({ azienda_id }) {
+  const { t, lingua } = useLingua()
+  const locale = lingua === 'de' ? 'de-DE' : 'it-IT'
   const [caricamento, setCaricamento] = useState(true)
   const [dipendenti, setDipendenti] = useState([])
   const [ultimiEventi, setUltimiEventi] = useState({})
@@ -157,7 +163,7 @@ function VistaGestione({ azienda_id }) {
   }
 
   async function eliminaEvento(id) {
-    if (!window.confirm('Eliminare questa timbratura? Non si può annullare.')) return
+    if (!window.confirm(t('timbratura.confermaElimina'))) return
     await supabase.from('timbrature').delete().eq('id', id)
     await caricaEventi()
   }
@@ -170,34 +176,34 @@ function VistaGestione({ azienda_id }) {
 
   return (
     <div>
-      <IntestazioneSezione titolo="Timbratura" sottotitolo={caricamento ? undefined : `${dipendenti.length} dipendenti`} />
+      <IntestazioneSezione titolo={t('timbratura.titolo')} sottotitolo={caricamento ? undefined : `${dipendenti.length} ${t('timbratura.dipendenti')}`} />
 
       {caricamento && <ScheletroCaricamento righe={3} />}
 
       {!caricamento && dipendenti.length === 0 && (
-        <EmptyState icona={<IconaCalendario />} titolo="Nessun dipendente ancora"
-          sottotitolo="Aggiungi prima qualcuno nella sezione Dipendenti." />
+        <EmptyState icona={<IconaCalendario />} titolo={t('timbratura.nessunDipendente')}
+          sottotitolo={t('timbratura.aggiungiDipendenti')} />
       )}
 
       {!caricamento && dipendenti.length > 0 && (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
             {dipendenti.map(d => {
-              const stato = statoAttuale(ultimiEventi[d.id])
+              const stato = statoAttuale(ultimiEventi[d.id], locale)
               return (
                 <Card key={d.id} style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
                   <div style={{ minWidth: 0 }}>
                     <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: 'var(--espresso)' }}>{d.nome}</p>
                     {stato.alLavoro
-                      ? <Badge>Al lavoro dalle {stato.dalle}</Badge>
-                      : <span style={{ fontSize: 12, color: 'var(--mocha)' }}>Fuori turno</span>}
+                      ? <Badge>{t('timbratura.alLavoroDalle')} {stato.dalle}</Badge>
+                      : <span style={{ fontSize: 12, color: 'var(--mocha)' }}>{t('timbratura.fuoriTurno')}</span>}
                   </div>
                   <button
                     onClick={() => timbra(d.id, stato.alLavoro ? 'uscita' : 'entrata')}
                     disabled={azioneId === d.id}
                     style={{ ...pulsanteFantasma, flexShrink: 0, background: stato.alLavoro ? 'var(--fragola-chiaro)' : 'var(--pistacchio-chiaro)', border: 'none', color: stato.alLavoro ? 'var(--fragola-scuro)' : 'var(--pistacchio-scuro)' }}
                   >
-                    {stato.alLavoro ? 'Segna uscita' : 'Segna entrata'}
+                    {stato.alLavoro ? t('timbratura.segnaUscita') : t('timbratura.segnaEntrata')}
                   </button>
                 </Card>
               )
@@ -221,10 +227,10 @@ function VistaGestione({ azienda_id }) {
                     <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--espresso)' }}>{d.nome}</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ fontFamily: 'var(--font-dati)', fontSize: 15, color: 'var(--espresso)' }}>
-                        {calcolaOre(eventiMese[d.id] || [])} ore
+                        {calcolaOre(eventiMese[d.id] || [])} {t('timbratura.ore')}
                         {d.costo_orario ? ` · ${(calcolaOre(eventiMese[d.id] || []) * d.costo_orario).toFixed(2)} €` : ''}
                       </span>
-                      <span style={{ fontSize: 12, color: 'var(--pistacchio)', fontWeight: 500 }}>{aperto ? 'Chiudi' : 'Correggi'}</span>
+                      <span style={{ fontSize: 12, color: 'var(--pistacchio)', fontWeight: 500 }}>{aperto ? t('comune.chiudi') : t('comune.correggi')}</span>
                     </span>
                   </button>
                   {aperto && (
@@ -247,40 +253,41 @@ function VistaGestione({ azienda_id }) {
 }
 
 function PannelloCorrezione({ dipendente, eventi, onCorreggi, onElimina, onAggiungi }) {
+  const { t } = useLingua()
   const [nuovoTipo, setNuovoTipo] = useState('entrata')
   const [nuovoOrario, setNuovoOrario] = useState('')
 
   return (
     <div style={{ borderTop: '1px solid var(--bordo-chiaro)', padding: '12px 16px 16px', background: 'var(--bordo-chiaro)' }}>
       {eventi.length === 0 && (
-        <p style={{ fontSize: 13, color: 'var(--mocha)', margin: '0 0 12px' }}>Nessuna timbratura questo mese.</p>
+        <p style={{ fontSize: 13, color: 'var(--mocha)', margin: '0 0 12px' }}>{t('timbratura.nessunaTimbratura')}</p>
       )}
       {eventi.map(e => (
         <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
           <select value={e.tipo} onChange={ev => onCorreggi(e.id, { tipo: ev.target.value })}
             style={{ borderRadius: 8, border: '1.5px solid var(--bordo)', padding: '8px 6px', fontSize: 13, background: 'var(--bianco)' }}>
-            <option value="entrata">Entrata</option>
-            <option value="uscita">Uscita</option>
+            <option value="entrata">{t('comune.entrata')}</option>
+            <option value="uscita">{t('comune.uscita')}</option>
           </select>
           <input type="datetime-local" value={perInputLocale(e.orario)}
             onChange={ev => ev.target.value && onCorreggi(e.id, { orario: new Date(ev.target.value).toISOString() })}
             style={{ flex: 1, minWidth: 0, borderRadius: 8, border: '1.5px solid var(--bordo)', padding: '8px 6px', fontSize: 13, background: 'var(--bianco)' }} />
-          <PulsanteIcona titolo="Elimina timbratura" onClick={() => onElimina(e.id)}>
+          <PulsanteIcona titolo={t('timbratura.eliminaTimbratura')} onClick={() => onElimina(e.id)}>
             <div style={{ width: 16, height: 16 }}><IconaCestino /></div>
           </PulsanteIcona>
         </div>
       ))}
 
-      <p style={{ fontSize: 12, color: 'var(--mocha)', fontWeight: 600, margin: '12px 0 8px' }}>Aggiungi timbratura dimenticata</p>
+      <p style={{ fontSize: 12, color: 'var(--mocha)', fontWeight: 600, margin: '12px 0 8px' }}>{t('timbratura.aggiungiDimenticata')}</p>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <select value={nuovoTipo} onChange={e => setNuovoTipo(e.target.value)}
           style={{ borderRadius: 8, border: '1.5px solid var(--bordo)', padding: '8px 6px', fontSize: 13, background: 'var(--bianco)' }}>
-          <option value="entrata">Entrata</option>
-          <option value="uscita">Uscita</option>
+          <option value="entrata">{t('comune.entrata')}</option>
+          <option value="uscita">{t('comune.uscita')}</option>
         </select>
         <input type="datetime-local" value={nuovoOrario} onChange={e => setNuovoOrario(e.target.value)}
           style={{ flex: 1, minWidth: 0, borderRadius: 8, border: '1.5px solid var(--bordo)', padding: '8px 6px', fontSize: 13, background: 'var(--bianco)' }} />
-        <PulsanteIcona titolo="Aggiungi" colore="var(--pistacchio)" onClick={() => { onAggiungi(dipendente.id, nuovoTipo, nuovoOrario); setNuovoOrario('') }}>
+        <PulsanteIcona titolo={t('timbratura.aggiungi')} colore="var(--pistacchio)" onClick={() => { onAggiungi(dipendente.id, nuovoTipo, nuovoOrario); setNuovoOrario('') }}>
           <div style={{ width: 20, height: 20 }}><IconaPiu /></div>
         </PulsanteIcona>
       </div>
