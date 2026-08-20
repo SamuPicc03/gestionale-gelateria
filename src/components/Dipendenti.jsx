@@ -106,13 +106,18 @@ export default function Dipendenti({ azienda_id, puoGestire }) {
                   )}
                 </div>
                 {puoGestire && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 4px 2px' }}>
-                    <label style={{ fontSize: 12, color: 'var(--mocha)' }}>{t('dipendenti.costoOrario')}</label>
-                    <input type="number" min="0" step="0.5" value={d.costo_orario ?? ''}
-                      placeholder="—"
-                      onChange={e => aggiornaCostoOrario(d.id, e.target.value ? Number(e.target.value) : null)}
-                      style={{ width: 64, fontFamily: 'var(--font-dati)', fontSize: 13, border: '1.5px solid var(--bordo)', borderRadius: 6, padding: '4px 6px' }} />
-                    <span style={{ fontSize: 12, color: 'var(--mocha)' }}>{t('comune.euroOra')}</span>
+                  <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--bordo-chiaro)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 12, color: 'var(--espresso)', fontWeight: 500 }}>{t('dipendenti.costoOrario')}</p>
+                      <p style={{ margin: '1px 0 0', fontSize: 10, color: 'var(--mocha)' }}>{t('dipendenti.costoStima')}</p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                      <input type="number" min="0" step="0.5" value={d.costo_orario ?? ''}
+                        placeholder="—"
+                        onChange={e => aggiornaCostoOrario(d.id, e.target.value ? Number(e.target.value) : null)}
+                        style={{ width: 60, textAlign: 'right', fontFamily: 'var(--font-dati)', fontSize: 14, border: '1.5px solid var(--bordo)', borderRadius: 8, padding: '6px 8px' }} />
+                      <span style={{ fontSize: 12, color: 'var(--mocha)' }}>{t('comune.euroOra')}</span>
+                    </div>
                   </div>
                 )}
               </Card>

@@ -18,12 +18,14 @@ create table profili (
 
 -- Prodotti in inventario. "prezzo_vendita" è opzionale: serve solo per la modalità
 -- "prodotto per prodotto" della sezione Vendite, non per l'inventario in sé.
+-- "soglia_scorta_bassa" è opzionale: se non impostata si usa 3 come default (vedi app).
 create table prodotti (
   id uuid primary key default gen_random_uuid(),
   azienda_id uuid references aziende(id) on delete cascade,
   nome text not null default 'Prodotto',
   quantita int not null default 0,
   prezzo_vendita numeric(8,2),
+  soglia_scorta_bassa int,
   aggiornato_il timestamptz default now()
 );
 
@@ -310,17 +312,18 @@ create policy "modifica incassi responsabile+" on incassi_giornalieri
     )
   );
 
--- Turni pianificati per fascia. Un dipendente può avere più fasce nello stesso giorno
--- (es. mattina e sera): una riga per ogni fascia assegnata. "Riposo" non si salva come
--- valore: è semplicemente l'assenza di righe per quel dipendente in quel giorno.
+-- Turni pianificati con orario libero. Un dipendente può avere più turni nello stesso
+-- giorno (es. turno spezzato): una riga per ogni turno, identificata dal proprio id
+-- (non da una fascia fissa). "Riposo" non si salva come valore: è semplicemente
+-- l'assenza di righe per quel dipendente in quel giorno.
 create table turni (
   id uuid primary key default gen_random_uuid(),
   azienda_id uuid references aziende(id) on delete cascade,
   dipendente_id uuid references dipendenti(id) on delete cascade,
   giorno date not null,
-  fascia text not null check (fascia in ('mattina', 'pomeriggio', 'sera')),
-  aggiornato_il timestamptz default now(),
-  unique (dipendente_id, giorno, fascia)
+  ora_inizio time not null default '09:00',
+  ora_fine time not null default '13:00',
+  aggiornato_il timestamptz default now()
 );
 
 alter table turni enable row level security;
@@ -351,7 +354,7 @@ create policy "modifica turni responsabile+" on turni
     )
   );
 
--- Serve per togliere una fascia già assegnata (es. tornare a "riposo")
+-- Serve per togliere un turno già assegnato (es. tornare a "riposo")
 drop policy if exists "elimina turni responsabile+" on turni;
 create policy "elimina turni responsabile+" on turni
   for delete using (

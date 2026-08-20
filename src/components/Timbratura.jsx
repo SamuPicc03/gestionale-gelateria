@@ -225,10 +225,16 @@ function VistaGestione({ azienda_id }) {
                     }}
                   >
                     <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--espresso)' }}>{d.nome}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontFamily: 'var(--font-dati)', fontSize: 15, color: 'var(--espresso)' }}>
-                        {calcolaOre(eventiMese[d.id] || [])} {t('timbratura.ore')}
-                        {d.costo_orario ? ` · ${(calcolaOre(eventiMese[d.id] || []) * d.costo_orario).toFixed(2)} €` : ''}
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <span style={{ textAlign: 'right' }}>
+                        <span style={{ display: 'block', fontFamily: 'var(--font-dati)', fontSize: 15, color: 'var(--espresso)', lineHeight: 1.3 }}>
+                          {calcolaOre(eventiMese[d.id] || [])} {t('timbratura.ore')}
+                        </span>
+                        {d.costo_orario != null && (
+                          <span title={t('timbratura.costoStimato')} style={{ display: 'block', fontFamily: 'var(--font-dati)', fontSize: 12, color: 'var(--pistacchio-scuro)', lineHeight: 1.3 }}>
+                            {(calcolaOre(eventiMese[d.id] || []) * d.costo_orario).toFixed(2)} €
+                          </span>
+                        )}
                       </span>
                       <span style={{ fontSize: 12, color: 'var(--pistacchio)', fontWeight: 500 }}>{aperto ? t('comune.chiudi') : t('comune.correggi')}</span>
                     </span>

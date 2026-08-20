@@ -27,6 +27,11 @@ export default function Inventario({ azienda_id, puoGestire }) {
     await supabase.from('prodotti').update({ quantita }).eq('id', id)
   }
 
+  async function aggiornaSoglia(id, soglia_scorta_bassa) {
+    setProdotti(prodotti.map(p => p.id === id ? { ...p, soglia_scorta_bassa } : p))
+    await supabase.from('prodotti').update({ soglia_scorta_bassa }).eq('id', id)
+  }
+
   async function aggiornaNome(id, nome) {
     setProdotti(prodotti.map(p => p.id === id ? { ...p, nome } : p))
     await supabase.from('prodotti').update({ nome }).eq('id', id)
@@ -46,7 +51,7 @@ export default function Inventario({ azienda_id, puoGestire }) {
     await supabase.from('prodotti').delete().eq('id', id)
   }
 
-  const scortaBassaCount = prodotti.filter(p => p.quantita <= 3).length
+  const scortaBassaCount = prodotti.filter(p => p.quantita <= (p.soglia_scorta_bassa ?? 3)).length
 
   return (
     <div>
@@ -88,7 +93,8 @@ export default function Inventario({ azienda_id, puoGestire }) {
       {!caricamento && prodotti.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
           {prodotti.map(p => {
-            const scortaBassa = p.quantita <= 3
+            const soglia = p.soglia_scorta_bassa ?? 3
+            const scortaBassa = p.quantita <= soglia
             return (
               <Card key={p.id} style={{ padding: 16, position: 'relative' }}>
                 {puoGestire && (
@@ -105,11 +111,17 @@ export default function Inventario({ azienda_id, puoGestire }) {
                   {p.quantita}
                 </p>
                 {scortaBassa && <Badge colore="var(--fragola-scuro)" sfondo="var(--fragola-chiaro)">{t('inventario.scortaBassa')}</Badge>}
-                <select value={p.quantita} onChange={e => aggiornaQuantita(p.id, Number(e.target.value))}
+                <input type="number" min="0" value={p.quantita} onChange={e => aggiornaQuantita(p.id, Number(e.target.value))}
                   disabled={!puoGestire}
-                  style={{ width: '100%', marginTop: 10, borderRadius: 8, border: '1.5px solid var(--bordo)', padding: '8px 10px', fontSize: 14 }}>
-                  {Array.from({ length: 51 }, (_, q) => <option key={q} value={q}>{q}</option>)}
-                </select>
+                  style={{ width: '100%', marginTop: 10, borderRadius: 8, border: '1.5px solid var(--bordo)', padding: '8px 10px', fontSize: 14, fontFamily: 'var(--font-dati)' }} />
+                {puoGestire && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8 }}>
+                    <label style={{ fontSize: 11, color: 'var(--mocha)', flexShrink: 0 }}>{t('inventario.sogliaScortaBassa')}</label>
+                    <input type="number" min="0" value={soglia}
+                      onChange={e => aggiornaSoglia(p.id, e.target.value ? Number(e.target.value) : null)}
+                      style={{ width: 44, borderRadius: 6, border: '1.5px solid var(--bordo)', padding: '4px 6px', fontSize: 12, fontFamily: 'var(--font-dati)' }} />
+                  </div>
+                )}
               </Card>
             )
           })}

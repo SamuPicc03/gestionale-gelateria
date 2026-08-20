@@ -1,17 +1,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { Card, EmptyState, ScheletroCaricamento, IntestazioneSezione, pulsanteFantasma, IconaCalendario } from './ui'
+import { Card, EmptyState, ScheletroCaricamento, IntestazioneSezione, pulsanteFantasma, PulsanteIcona, IconaCalendario, IconaCestino } from './ui'
 import { useLingua } from '../i18n'
 
-const FASCE = ['mattina', 'pomeriggio', 'sera', 'riposo']
-const COLORE_FASCIA = { mattina: 'var(--miele)', pomeriggio: 'var(--blu-cielo)', sera: 'var(--viola)', riposo: 'var(--mocha)' }
-const COLORE_FASCIA_CHIARO = { mattina: 'var(--miele-chiaro)', pomeriggio: 'var(--blu-cielo-chiaro)', sera: 'var(--viola-chiaro)', riposo: 'var(--bordo-chiaro)' }
-
-function inizioSettimana(data) {
-  const d = new Date(data)
-  const giorno = d.getDay() || 7
-  d.setDate(d.getDate() - giorno + 1)
-  return d
+function inizioSettimana(d) {
+  const x = new Date(d)
+  const g = x.getDay() || 7
+  x.setDate(x.getDate() - g + 1)
+  return x
 }
 
 function formattaData(d) {
@@ -20,6 +16,15 @@ function formattaData(d) {
 
 function stessoGiorno(a, b) {
   return a.toDateString() === b.toDateString()
+}
+
+// Colore del pallino nel calendario in base all'ora di inizio — solo estetico,
+// non un dato salvato: prima delle 12 = "mattina", 12-17 = "pomeriggio", dopo = "sera".
+function coloreOraInizio(oraInizio) {
+  const ora = parseInt(oraInizio.slice(0, 2), 10)
+  if (ora < 12) return 'var(--miele)'
+  if (ora < 17) return 'var(--blu-cielo)'
+  return 'var(--viola)'
 }
 
 // Tutti i giorni da mostrare in griglia: dal lunedì della settimana del giorno 1
@@ -38,7 +43,6 @@ function generaGriglia(meseRif) {
 
 export default function Turni({ azienda_id, puoGestire }) {
   const { t, lingua } = useLingua()
-  const LABEL_FASCIA = { mattina: t('turni.mattina'), pomeriggio: t('turni.pomeriggio'), sera: t('turni.sera'), riposo: t('turni.riposo') }
   const GIORNI_BREVI = t('turni.giorniBrevi')
   const GIORNI_LABEL = t('turni.giorniLabel')
 
@@ -69,29 +73,38 @@ export default function Turni({ azienda_id, puoGestire }) {
     setCaricamento(true)
     const dal = formattaData(giorniGriglia[0])
     const al = formattaData(giorniGriglia[giorniGriglia.length - 1])
-    const { data } = await supabase.from('turni').select('*').gte('giorno', dal).lte('giorno', al)
+    const { data } = await supabase.from('turni').select('*').gte('giorno', dal).lte('giorno', al).order('ora_inizio')
     const mappa = {}
-    ;(data || []).forEach(t => {
-      const chiave = `${t.dipendente_id}_${t.giorno}`
-      ;(mappa[chiave] ||= []).push(t.fascia)
+    ;(data || []).forEach(turno => {
+      const chiave = `${turno.dipendente_id}_${turno.giorno}`
+      ;(mappa[chiave] ||= []).push({ id: turno.id, ora_inizio: turno.ora_inizio.slice(0, 5), ora_fine: turno.ora_fine.slice(0, 5) })
     })
     setTurni(mappa)
     setCaricamento(false)
   }
 
-  // Ogni fascia è indipendente: un dipendente può averne più di una nello stesso giorno.
-  async function toggleFascia(dipendente_id, giorno, fascia, attualmenteAttiva) {
+  async function aggiungiTurno(dipendente_id, giorno) {
+    const { data, error } = await supabase.from('turni')
+      .insert({ azienda_id, dipendente_id, giorno, ora_inizio: '09:00', ora_fine: '13:00' })
+      .select().single()
+    if (error || !data) return
     const chiave = `${dipendente_id}_${giorno}`
-    if (attualmenteAttiva) {
-      setTurni(prev => ({ ...prev, [chiave]: (prev[chiave] || []).filter(f => f !== fascia) }))
-      await supabase.from('turni').delete().match({ dipendente_id, giorno, fascia })
-    } else {
-      setTurni(prev => ({ ...prev, [chiave]: [...(prev[chiave] || []), fascia] }))
-      await supabase.from('turni').upsert({ azienda_id, dipendente_id, giorno, fascia }, { onConflict: 'dipendente_id,giorno,fascia' })
-    }
+    setTurni(prev => ({ ...prev, [chiave]: [...(prev[chiave] || []), { id: data.id, ora_inizio: '09:00', ora_fine: '13:00' }] }))
   }
 
-  // "Riposo" non è un valore salvato: significa solo togliere tutte le fasce di quel giorno.
+  async function aggiornaTurno(dipendente_id, giorno, id, campo, valore) {
+    const chiave = `${dipendente_id}_${giorno}`
+    setTurni(prev => ({ ...prev, [chiave]: (prev[chiave] || []).map(tu => tu.id === id ? { ...tu, [campo]: valore } : tu) }))
+    await supabase.from('turni').update({ [campo]: valore }).eq('id', id)
+  }
+
+  async function eliminaTurno(dipendente_id, giorno, id) {
+    const chiave = `${dipendente_id}_${giorno}`
+    setTurni(prev => ({ ...prev, [chiave]: (prev[chiave] || []).filter(tu => tu.id !== id) }))
+    await supabase.from('turni').delete().eq('id', id)
+  }
+
+  // "Riposo" non è un valore salvato: significa solo togliere tutti i turni di quel giorno.
   async function impostaRiposo(dipendente_id, giorno) {
     const chiave = `${dipendente_id}_${giorno}`
     setTurni(prev => ({ ...prev, [chiave]: [] }))
@@ -146,7 +159,7 @@ export default function Turni({ azienda_id, puoGestire }) {
                   const isOggi = stessoGiorno(d, oggi)
                   const selezionato = giorno === giornoSelezionato
                   const puntiGiorno = dipendenti.flatMap(dip =>
-                    (turni[`${dip.id}_${giorno}`] || []).map(f => ({ chiave: `${dip.id}_${f}`, colore: COLORE_FASCIA[f] }))
+                    (turni[`${dip.id}_${giorno}`] || []).map(tu => ({ chiave: `${dip.id}_${tu.id}`, colore: coloreOraInizio(tu.ora_inizio) }))
                   )
 
                   return (
@@ -183,38 +196,48 @@ export default function Turni({ azienda_id, puoGestire }) {
               <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--espresso)', margin: '0 0 14px' }}>
                 {GIORNI_LABEL[(dettaglioData.getDay() || 7) - 1]} {dettaglioData.getDate()}
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {dipendenti.map(dip => {
-                  const fasceAttive = turni[`${dip.id}_${giornoSelezionato}`] || []
+                  const turniGiorno = turni[`${dip.id}_${giornoSelezionato}`] || []
                   return (
                     <div key={dip.id}>
-                      <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 600, color: 'var(--espresso)' }}>{dip.nome}</p>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-                        {FASCE.map(f => {
-                          const selezionata = f === 'riposo' ? fasceAttive.length === 0 : fasceAttive.includes(f)
-                          return (
-                            <button
-                              key={f}
-                              disabled={!puoGestire}
-                              onClick={() => f === 'riposo'
-                                ? impostaRiposo(dip.id, giornoSelezionato)
-                                : toggleFascia(dip.id, giornoSelezionato, f, selezionata)}
-                              style={{
-                                padding: '8px 2px', borderRadius: 8, border: 'none',
-                                background: selezionata ? COLORE_FASCIA[f] : COLORE_FASCIA_CHIARO[f],
-                                color: selezionata ? '#FFFFFF' : 'var(--espresso)',
-                                fontSize: 11, fontWeight: selezionata ? 700 : 500,
-                              }}
-                            >
-                              {LABEL_FASCIA[f]}
-                            </button>
-                          )
-                        })}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--espresso)' }}>{dip.nome}</p>
+                        {puoGestire && turniGiorno.length > 0 && (
+                          <button onClick={() => impostaRiposo(dip.id, giornoSelezionato)} style={{ ...pulsanteFantasma, padding: '4px 10px', fontSize: 11 }}>
+                            {t('turni.riposo')}
+                          </button>
+                        )}
                       </div>
-                      {fasceAttive.length > 1 && (
-                        <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--mocha)' }}>
-                          {t('turni.turnoSpezzato')}: {fasceAttive.map(f => LABEL_FASCIA[f]).join(' + ')}
-                        </p>
+
+                      {turniGiorno.length === 0 ? (
+                        <p style={{ margin: 0, fontSize: 12, color: 'var(--mocha)' }}>{t('turni.nessunTurno')}</p>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+                          {turniGiorno.map(tu => (
+                            <div key={tu.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ width: 8, height: 8, borderRadius: '50%', background: coloreOraInizio(tu.ora_inizio), flexShrink: 0 }} />
+                              <input type="time" value={tu.ora_inizio} disabled={!puoGestire}
+                                onChange={e => aggiornaTurno(dip.id, giornoSelezionato, tu.id, 'ora_inizio', e.target.value)}
+                                style={{ flex: 1, minWidth: 0, borderRadius: 8, border: '1.5px solid var(--bordo)', padding: '7px 6px', fontSize: 13 }} />
+                              <span style={{ color: 'var(--mocha)', fontSize: 12 }}>–</span>
+                              <input type="time" value={tu.ora_fine} disabled={!puoGestire}
+                                onChange={e => aggiornaTurno(dip.id, giornoSelezionato, tu.id, 'ora_fine', e.target.value)}
+                                style={{ flex: 1, minWidth: 0, borderRadius: 8, border: '1.5px solid var(--bordo)', padding: '7px 6px', fontSize: 13 }} />
+                              {puoGestire && (
+                                <PulsanteIcona titolo={t('turni.eliminaTurno')} onClick={() => eliminaTurno(dip.id, giornoSelezionato, tu.id)}>
+                                  <div style={{ width: 15, height: 15 }}><IconaCestino /></div>
+                                </PulsanteIcona>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {puoGestire && (
+                        <button onClick={() => aggiungiTurno(dip.id, giornoSelezionato)} style={{ ...pulsanteFantasma, fontSize: 12, padding: '6px 12px' }}>
+                          {t('turni.aggiungiTurno')}
+                        </button>
                       )}
                     </div>
                   )
