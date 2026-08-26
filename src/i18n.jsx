@@ -35,6 +35,8 @@ const TESTI = {
       pulsanteAggiungi: '+ Aggiungi prodotto', eliminaProdotto: 'Elimina prodotto',
       confermaElimina: nome => `Eliminare "${nome}" dall'inventario?`,
       quantita: 'Quantità', sogliaScortaBassa: 'Soglia scorta bassa',
+      fornitori: 'Fornitori', fornitoriSpiegazione: 'Si impostano una volta sola, poi restano — servono per mandare gli ordini.',
+      fornitoreNome: 'Nome fornitore', fornitoreEmail: 'Email fornitore', creaOrdine: '📦 Crea ordine',
     },
     vendite: {
       titolo: 'Vendite', sottotitolo: 'Incassi e andamento',
@@ -137,6 +139,16 @@ const TESTI = {
         ]},
       ],
     },
+    ordine: {
+      titolo: 'Ordine fornitori', sottotitolo: 'Scegli cosa ordinare, per fornitore', chiudi: '← Chiudi',
+      quantitaDaOrdinare: 'Quantità da ordinare', nessunProdotto: 'Nessun prodotto in inventario.',
+      prodottiSenzaFornitore: 'Prodotti selezionati senza fornitore impostato',
+      vaiSuFornitori: 'Vai su "Fornitori" in Inventario per collegarli a un\'email.',
+      inviaA: fornitore => `Invia a ${fornitore}`,
+      inviando: 'Invio in corso…', ordineInviato: 'Ordine inviato!', erroreInvio: 'Errore nell\'invio: ',
+      nessunaSelezione: 'Non hai selezionato nessun prodotto — scrivi una quantità maggiore di zero su quelli che vuoi ordinare.',
+      oggettoOrdine: azienda => `Ordine da ${azienda}`,
+    },
   },
   de: {
     comune: {
@@ -170,6 +182,8 @@ const TESTI = {
       pulsanteAggiungi: '+ Produkt hinzufügen', eliminaProdotto: 'Produkt löschen',
       confermaElimina: nome => `"${nome}" aus dem Lager löschen?`,
       quantita: 'Menge', sogliaScortaBassa: 'Schwelle für niedrigen Bestand',
+      fornitori: 'Lieferanten', fornitoriSpiegazione: 'Werden einmal eingestellt und bleiben gespeichert — nötig, um Bestellungen zu senden.',
+      fornitoreNome: 'Lieferantenname', fornitoreEmail: 'Lieferanten-E-Mail', creaOrdine: '📦 Bestellung erstellen',
     },
     vendite: {
       titolo: 'Umsatz', sottotitolo: 'Einnahmen und Verlauf',
@@ -271,6 +285,16 @@ const TESTI = {
           { d: 'Wie lade ich eine erhaltene Rechnung hoch?', r: 'Tippe auf "+ Neu", trage Lieferant und Betrag ein und lade das PDF der Rechnung hoch.' },
         ]},
       ],
+    },
+    ordine: {
+      titolo: 'Lieferantenbestellung', sottotitolo: 'Wähle aus, was du pro Lieferant bestellen willst', chiudi: '← Schließen',
+      quantitaDaOrdinare: 'Zu bestellende Menge', nessunProdotto: 'Keine Produkte im Lager.',
+      prodottiSenzaFornitore: 'Ausgewählte Produkte ohne festgelegten Lieferanten',
+      vaiSuFornitori: 'Gehe zu "Lieferanten" im Lagerbestand, um sie mit einer E-Mail zu verknüpfen.',
+      inviaA: fornitore => `An ${fornitore} senden`,
+      inviando: 'Wird gesendet…', ordineInviato: 'Bestellung gesendet!', erroreInvio: 'Fehler beim Senden: ',
+      nessunaSelezione: 'Du hast kein Produkt ausgewählt — trage bei den gewünschten Produkten eine Menge größer als null ein.',
+      oggettoOrdine: azienda => `Bestellung von ${azienda}`,
     },
   },
 }

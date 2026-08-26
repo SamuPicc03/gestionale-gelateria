@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import {
-  Card, Badge, EmptyState, ScheletroCaricamento, IntestazioneSezione,
+  Card, Badge, EmptyState, ScheletroCaricamento, IntestazioneSezione, pulsanteFantasma,
   PulsanteIcona, IconaScatola, IconaPiu, IconaCestino,
 } from './ui'
 import { useLingua } from '../i18n'
+import OrdineFornitori from './OrdineFornitori'
 
 export default function Inventario({ azienda_id, puoGestire }) {
   const { t } = useLingua()
   const [prodotti, setProdotti] = useState([])
   const [caricamento, setCaricamento] = useState(true)
+  const [mostraFornitori, setMostraFornitori] = useState(false)
+  const [mostraOrdine, setMostraOrdine] = useState(false)
 
   useEffect(() => {
     caricaProdotti()
@@ -30,6 +33,11 @@ export default function Inventario({ azienda_id, puoGestire }) {
   async function aggiornaSoglia(id, soglia_scorta_bassa) {
     setProdotti(prodotti.map(p => p.id === id ? { ...p, soglia_scorta_bassa } : p))
     await supabase.from('prodotti').update({ soglia_scorta_bassa }).eq('id', id)
+  }
+
+  async function aggiornaFornitore(id, campo, valore) {
+    setProdotti(prodotti.map(p => p.id === id ? { ...p, [campo]: valore } : p))
+    await supabase.from('prodotti').update({ [campo]: valore }).eq('id', id)
   }
 
   async function aggiornaNome(id, nome) {
@@ -53,6 +61,10 @@ export default function Inventario({ azienda_id, puoGestire }) {
 
   const scortaBassaCount = prodotti.filter(p => p.quantita <= (p.soglia_scorta_bassa ?? 3)).length
 
+  if (mostraOrdine) {
+    return <OrdineFornitori azienda_id={azienda_id} prodotti={prodotti} onChiudi={() => setMostraOrdine(false)} />
+  }
+
   return (
     <div>
       <IntestazioneSezione
@@ -64,6 +76,33 @@ export default function Inventario({ azienda_id, puoGestire }) {
           </PulsanteIcona>
         )}
       />
+
+      {puoGestire && !caricamento && prodotti.length > 0 && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+          <button onClick={() => setMostraFornitori(v => !v)} style={pulsanteFantasma}>{t('inventario.fornitori')}</button>
+          <button onClick={() => setMostraOrdine(true)} style={pulsanteFantasma}>{t('inventario.creaOrdine')}</button>
+        </div>
+      )}
+
+      {mostraFornitori && (
+        <Card style={{ padding: '14px 16px', marginBottom: 16 }}>
+          <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, color: 'var(--espresso)' }}>{t('inventario.fornitori')}</p>
+          <p style={{ margin: '0 0 12px', fontSize: 11, color: 'var(--mocha)' }}>{t('inventario.fornitoriSpiegazione')}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {prodotti.map(p => (
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 13, color: 'var(--espresso)', flex: '1 1 100px', minWidth: 90 }}>{p.nome}</span>
+                <input placeholder={t('inventario.fornitoreNome')} value={p.fornitore_nome || ''}
+                  onChange={e => aggiornaFornitore(p.id, 'fornitore_nome', e.target.value || null)}
+                  style={{ flex: '1 1 120px', minWidth: 100, borderRadius: 6, border: '1.5px solid var(--bordo)', padding: '6px 8px', fontSize: 12 }} />
+                <input placeholder={t('inventario.fornitoreEmail')} type="email" value={p.fornitore_email || ''}
+                  onChange={e => aggiornaFornitore(p.id, 'fornitore_email', e.target.value || null)}
+                  style={{ flex: '1 1 160px', minWidth: 140, borderRadius: 6, border: '1.5px solid var(--bordo)', padding: '6px 8px', fontSize: 12 }} />
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {!caricamento && prodotti.length > 0 && (
         <div style={{ marginBottom: 16 }}>

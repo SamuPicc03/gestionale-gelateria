@@ -19,6 +19,7 @@ create table profili (
 -- Prodotti in inventario. "prezzo_vendita" è opzionale: serve solo per la modalità
 -- "prodotto per prodotto" della sezione Vendite, non per l'inventario in sé.
 -- "soglia_scorta_bassa" è opzionale: se non impostata si usa 3 come default (vedi app).
+-- "fornitore_nome"/"fornitore_email" sono opzionali: servono per gli ordini fornitori.
 create table prodotti (
   id uuid primary key default gen_random_uuid(),
   azienda_id uuid references aziende(id) on delete cascade,
@@ -26,6 +27,8 @@ create table prodotti (
   quantita int not null default 0,
   prezzo_vendita numeric(8,2),
   soglia_scorta_bassa int,
+  fornitore_nome text,
+  fornitore_email text,
   aggiornato_il timestamptz default now()
 );
 
