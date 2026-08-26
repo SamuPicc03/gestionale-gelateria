@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient'
 import Login from './components/Login'
 import SceltaLingua from './components/SceltaLingua'
 import SceltaSede from './components/SceltaSede'
+import Aiuto from './components/Aiuto'
 import Inventario from './components/Inventario'
 import Vendite from './components/Vendite'
 import Dipendenti from './components/Dipendenti'
@@ -21,6 +22,7 @@ export default function App() {
   const [sedi, setSedi] = useState(undefined)
   const [sedeAttiva, setSedeAttiva] = useState(null)
   const [tab, setTab] = useState(null)
+  const [mostraAiuto, setMostraAiuto] = useState(false)
 
   const TUTTE_LE_SEZIONI = [
     { id: 'inventario', label: t('app.tabInventario'), Icona: IconaScatola, soloGestione: true },
@@ -87,6 +89,10 @@ export default function App() {
     return <SceltaSede sedi={sedi} onScegli={sceglisede} />
   }
 
+  if (mostraAiuto) {
+    return <Aiuto onChiudi={() => setMostraAiuto(false)} />
+  }
+
   const puoGestire = RUOLI_GESTIONE.includes(sedeAttiva.ruolo)
   const sezioni = TUTTE_LE_SEZIONI.filter(s => !s.soloGestione || puoGestire)
   const tabIniziale = puoGestire ? 'inventario' : 'timbratura'
@@ -114,7 +120,10 @@ export default function App() {
             </button>
           </div>
         </div>
-        <button onClick={() => supabase.auth.signOut()} style={pulsanteEsci}>{t('comune.esci')}</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button onClick={() => setMostraAiuto(true)} title={t('aiuto.titolo')} style={pulsanteAiuto}>?</button>
+          <button onClick={() => supabase.auth.signOut()} style={pulsanteEsci}>{t('comune.esci')}</button>
+        </div>
       </header>
 
       <main style={{ flex: 1, width: '100%', maxWidth: 720, margin: '0 auto', padding: '1.25rem 1.25rem 5.5rem', boxSizing: 'border-box' }}>
@@ -183,6 +192,11 @@ function SchermataMessaggio({ titolo, messaggio }) {
 const pulsanteEsci = {
   background: 'transparent', border: '1px solid var(--bordo)', borderRadius: 8,
   padding: '6px 14px', fontSize: 13, color: 'var(--mocha)',
+}
+
+const pulsanteAiuto = {
+  background: 'var(--pistacchio-chiaro)', border: 'none', borderRadius: '50%',
+  width: 30, height: 30, fontSize: 14, fontWeight: 700, color: 'var(--pistacchio-scuro)',
 }
 
 const pulsanteSede = {

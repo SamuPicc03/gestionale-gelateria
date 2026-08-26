@@ -100,6 +100,43 @@ const TESTI = {
       nuovaFattura: '+ Nuova fattura', emessaIl: 'Emessa il', scadeIl: 'Scade il',
       erroreCaricamento: 'Errore nel caricamento del PDF: ', erroreSalvataggio: 'Errore nel salvataggio: ',
     },
+    aiuto: {
+      titolo: 'Aiuto', sottotitolo: 'Le domande più comuni', chiudi: '← Chiudi',
+      sezioni: [
+        { titolo: 'Accesso e sedi', domande: [
+          { d: 'Ho dimenticato la password, cosa faccio?', r: 'Chiedi a chi gestisce l\'attività di impostartene una nuova — non puoi farlo da solo per ora.' },
+          { d: 'Ho più di una sede, come cambio quella che vedo?', r: 'Tocca la scritta con il nome della sede, sotto "Gestionale" in alto, e scegli quella che vuoi vedere.' },
+          { d: 'Come cambio la lingua dell\'app?', r: 'Tocca la bandierina in alto accanto al nome della sede.' },
+        ]},
+        { titolo: 'Inventario', domande: [
+          { d: 'Come aggiungo un nuovo prodotto?', r: 'Nella sezione Inventario, tocca il pulsante "+" in alto a destra.' },
+          { d: 'Come cambio la quantità di un prodotto?', r: 'Tocca il numero sotto il nome del prodotto e scrivi quello nuovo.' },
+          { d: 'Cosa vuol dire "Scorta bassa"?', r: 'Compare quando la quantità scende sotto la soglia impostata per quel prodotto (di base 3, ma la puoi cambiare tu).' },
+          { d: 'Come cambio quando scatta l\'avviso di scorta bassa?', r: 'Sotto la quantità di ogni prodotto c\'è il campo "Soglia scorta bassa" — scrivi il numero che preferisci.' },
+        ]},
+        { titolo: 'Vendite', domande: [
+          { d: 'Come registro quanto ho incassato oggi?', r: 'Nella sezione Vendite, scheda "Inserisci", scrivi il numero nel campo "Fatturato di oggi".' },
+          { d: 'Cosa fa il "Dettaglio prodotto per prodotto"?', r: 'È facoltativo: se lo apri e inserisci le quantità vendute di ogni prodotto, il totale sopra si calcola da solo e in Report vedi anche i prodotti più venduti.' },
+          { d: 'Come vedo l\'andamento delle vendite nel tempo?', r: 'Scheda "Report", puoi scegliere Settimana, Mese o Anno.' },
+        ]},
+        { titolo: 'Dipendenti', domande: [
+          { d: 'Come aggiungo un dipendente?', r: 'Nella sezione Dipendenti, tocca il pulsante "+" in alto a destra.' },
+          { d: 'Come imposto quanto costa un dipendente all\'ora?', r: 'Sotto il nome del dipendente trovi il campo "Costo orario".' },
+          { d: 'Cosa vuol dire "Non collegato"?', r: 'Vuol dire che quel dipendente non ha ancora un proprio account per timbrare da solo — chiedi a chi gestisce l\'attività di collegarlo.' },
+        ]},
+        { titolo: 'Timbratura', domande: [
+          { d: 'Come fa un dipendente a timbrare entrata e uscita?', r: 'Deve avere un account personale collegato al suo profilo dipendente. Una volta collegato, fa login e trova un grande pulsante per segnare entrata/uscita.' },
+          { d: 'Ho sbagliato a timbrare, come correggo?', r: 'Chi gestisce può aprire il nome del dipendente nella sezione Timbratura e toccare "Correggi" per modificare o aggiungere una timbratura.' },
+        ]},
+        { titolo: 'Turni', domande: [
+          { d: 'Come assegno un turno a un dipendente?', r: 'Tocca il giorno nel calendario, poi "+ Aggiungi turno" sotto il nome del dipendente, e scrivi l\'orario di inizio e fine.' },
+          { d: 'Come segno che un dipendente è in riposo quel giorno?', r: 'Se ha già dei turni quel giorno, tocca "Riposo" accanto al suo nome per toglierli tutti in un colpo solo.' },
+        ]},
+        { titolo: 'Fatture', domande: [
+          { d: 'Come carico una fattura ricevuta?', r: 'Tocca "+ Nuova", compila fornitore e importo, e carica il PDF della fattura.' },
+        ]},
+      ],
+    },
   },
   de: {
     comune: {
@@ -197,6 +234,43 @@ const TESTI = {
       nessunaFattura: 'Noch keine Rechnungen', caricaPdf: 'Lade das PDF einer Rechnung hoch, um sie zu erfassen.',
       nuovaFattura: '+ Neue Rechnung', emessaIl: 'Ausgestellt am', scadeIl: 'Fällig am',
       erroreCaricamento: 'Fehler beim Hochladen des PDFs: ', erroreSalvataggio: 'Fehler beim Speichern: ',
+    },
+    aiuto: {
+      titolo: 'Hilfe', sottotitolo: 'Die häufigsten Fragen', chiudi: '← Schließen',
+      sezioni: [
+        { titolo: 'Zugang und Standorte', domande: [
+          { d: 'Ich habe mein Passwort vergessen, was mache ich?', r: 'Bitte die Geschäftsleitung, dir ein neues einzurichten — das geht derzeit nicht allein.' },
+          { d: 'Ich habe mehrere Standorte, wie wechsle ich?', r: 'Tippe auf den Namen des Standorts unter "Gestionale" oben und wähle den gewünschten aus.' },
+          { d: 'Wie ändere ich die Sprache der App?', r: 'Tippe oben neben dem Standortnamen auf die Flagge.' },
+        ]},
+        { titolo: 'Lagerbestand', domande: [
+          { d: 'Wie füge ich ein neues Produkt hinzu?', r: 'Tippe im Bereich Lagerbestand oben rechts auf "+".' },
+          { d: 'Wie ändere ich die Menge eines Produkts?', r: 'Tippe auf die Zahl unter dem Produktnamen und trage die neue ein.' },
+          { d: 'Was bedeutet "Bestand niedrig"?', r: 'Erscheint, wenn die Menge unter die für dieses Produkt festgelegte Schwelle fällt (Standard 3, änderbar).' },
+          { d: 'Wie ändere ich, wann der Hinweis erscheint?', r: 'Unter der Menge jedes Produkts gibt es das Feld "Schwelle für niedrigen Bestand" — trage die gewünschte Zahl ein.' },
+        ]},
+        { titolo: 'Umsatz', domande: [
+          { d: 'Wie trage ich den heutigen Umsatz ein?', r: 'Im Bereich Umsatz, Reiter "Eingeben", die Zahl bei "Umsatz heute" eintragen.' },
+          { d: 'Was macht die "Detailansicht pro Produkt"?', r: 'Optional: trägst du dort die verkauften Mengen ein, berechnet sich die Summe oben automatisch, und im Bericht siehst du auch die meistverkauften Produkte.' },
+          { d: 'Wie sehe ich den Umsatzverlauf?', r: 'Reiter "Bericht" — wählbar zwischen Woche, Monat oder Jahr.' },
+        ]},
+        { titolo: 'Mitarbeiter', domande: [
+          { d: 'Wie füge ich einen Mitarbeiter hinzu?', r: 'Tippe im Bereich Mitarbeiter oben rechts auf "+".' },
+          { d: 'Wie lege ich den Stundenlohn fest?', r: 'Unter dem Namen des Mitarbeiters findest du das Feld "Stundenlohn".' },
+          { d: 'Was bedeutet "Nicht verknüpft"?', r: 'Dieser Mitarbeiter hat noch kein eigenes Konto, um selbst zu stempeln — bitte die Geschäftsleitung, es zu verknüpfen.' },
+        ]},
+        { titolo: 'Zeiterfassung', domande: [
+          { d: 'Wie stempelt ein Mitarbeiter Kommen und Gehen?', r: 'Er braucht ein persönliches, mit seinem Mitarbeiterprofil verknüpftes Konto. Nach der Anmeldung sieht er eine große Taste zum Stempeln.' },
+          { d: 'Ich habe falsch gestempelt, wie korrigiere ich das?', r: 'Wer die Verwaltung hat, kann im Bereich Zeiterfassung den Namen öffnen und auf "Korrigieren" tippen.' },
+        ]},
+        { titolo: 'Schichten', domande: [
+          { d: 'Wie plane ich eine Schicht für einen Mitarbeiter?', r: 'Tippe im Kalender auf den Tag, dann unter dem Namen auf "+ Schicht hinzufügen" und trage Beginn und Ende ein.' },
+          { d: 'Wie trage ich ein, dass jemand an diesem Tag frei hat?', r: 'Hat er bereits Schichten an diesem Tag, tippe neben seinem Namen auf "Frei", um sie alle auf einmal zu entfernen.' },
+        ]},
+        { titolo: 'Rechnungen', domande: [
+          { d: 'Wie lade ich eine erhaltene Rechnung hoch?', r: 'Tippe auf "+ Neu", trage Lieferant und Betrag ein und lade das PDF der Rechnung hoch.' },
+        ]},
+      ],
     },
   },
 }
