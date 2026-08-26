@@ -20,7 +20,7 @@ export default function Dipendenti({ azienda_id, puoGestire }) {
 
   async function caricaDipendenti() {
     setCaricamento(true)
-    const { data } = await supabase.from('dipendenti').select('*').order('nome')
+    const { data } = await supabase.from('dipendenti').select('*').eq('azienda_id', azienda_id).order('nome')
     setDipendenti(data || [])
     setCaricamento(false)
     caricaPresenza()

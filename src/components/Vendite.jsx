@@ -56,7 +56,7 @@ function VistaInserimento({ azienda_id }) {
   const [mostraDettaglio, setMostraDettaglio] = useState(false)
 
   useEffect(() => {
-    supabase.from('prodotti').select('id, nome, prezzo_vendita').order('nome').then(({ data }) => setProdotti(data || []))
+    supabase.from('prodotti').select('id, nome, prezzo_vendita').eq('azienda_id', azienda_id).order('nome').then(({ data }) => setProdotti(data || []))
   }, [])
 
   useEffect(() => {
@@ -66,7 +66,7 @@ function VistaInserimento({ azienda_id }) {
   async function caricaGiorno() {
     setCaricamento(true)
     const [{ data: vendite }, { data: incasso }] = await Promise.all([
-      supabase.from('vendite').select('prodotto_id, quantita, importo').eq('giorno', formattaData(giorno)),
+      supabase.from('vendite').select('prodotto_id, quantita, importo').eq('azienda_id', azienda_id).eq('giorno', formattaData(giorno)),
       supabase.from('incassi_giornalieri').select('importo, costo').eq('azienda_id', azienda_id).eq('giorno', formattaData(giorno)).maybeSingle(),
     ])
     const mappa = {}
@@ -227,7 +227,7 @@ function VistaReport({ azienda_id }) {
   const [caricamento, setCaricamento] = useState(true)
 
   useEffect(() => {
-    supabase.from('prodotti').select('id, nome').then(({ data }) => setProdotti(data || []))
+    supabase.from('prodotti').select('id, nome').eq('azienda_id', azienda_id).then(({ data }) => setProdotti(data || []))
   }, [])
 
   function calcolaIntervallo(periodo, riferimento) {
@@ -281,7 +281,7 @@ function VistaReport({ azienda_id }) {
   async function caricaVendite() {
     setCaricamento(true)
     const [{ data: vp }, { data: vi }] = await Promise.all([
-      supabase.from('vendite').select('prodotto_id, giorno, quantita, importo')
+      supabase.from('vendite').select('prodotto_id, giorno, quantita, importo').eq('azienda_id', azienda_id)
         .gte('giorno', formattaData(dal)).lte('giorno', formattaData(al)),
       supabase.from('incassi_giornalieri').select('giorno, importo, costo').eq('azienda_id', azienda_id)
         .gte('giorno', formattaData(dal)).lte('giorno', formattaData(al)),

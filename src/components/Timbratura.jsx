@@ -122,7 +122,7 @@ function VistaGestione({ azienda_id }) {
   const [correzioneApertaId, setCorrezioneApertaId] = useState(null)
 
   useEffect(() => {
-    supabase.from('dipendenti').select('id, nome, costo_orario').order('nome').then(({ data }) => {
+    supabase.from('dipendenti').select('id, nome, costo_orario').eq('azienda_id', azienda_id).order('nome').then(({ data }) => {
       setDipendenti(data || [])
       setCaricamento(false)
     })

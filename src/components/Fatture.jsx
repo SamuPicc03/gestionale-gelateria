@@ -18,7 +18,7 @@ export default function Fatture({ azienda_id }) {
 
   async function caricaFatture() {
     setCaricamentoLista(true)
-    const { data } = await supabase.from('fatture').select('*').order('caricato_il', { ascending: false })
+    const { data } = await supabase.from('fatture').select('*').eq('azienda_id', azienda_id).order('caricato_il', { ascending: false })
     setFatture(data || [])
     setCaricamentoLista(false)
   }

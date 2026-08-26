@@ -62,7 +62,7 @@ export default function Turni({ azienda_id, puoGestire }) {
   const settimane = Array.from({ length: giorniGriglia.length / 7 }, (_, i) => giorniGriglia.slice(i * 7, i * 7 + 7))
 
   useEffect(() => {
-    supabase.from('dipendenti').select('*').order('nome').then(({ data }) => setDipendenti(data || []))
+    supabase.from('dipendenti').select('*').eq('azienda_id', azienda_id).order('nome').then(({ data }) => setDipendenti(data || []))
   }, [])
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function Turni({ azienda_id, puoGestire }) {
     setCaricamento(true)
     const dal = formattaData(giorniGriglia[0])
     const al = formattaData(giorniGriglia[giorniGriglia.length - 1])
-    const { data } = await supabase.from('turni').select('*').gte('giorno', dal).lte('giorno', al).order('ora_inizio')
+    const { data } = await supabase.from('turni').select('*').eq('azienda_id', azienda_id).gte('giorno', dal).lte('giorno', al).order('ora_inizio')
     const mappa = {}
     ;(data || []).forEach(turno => {
       const chiave = `${turno.dipendente_id}_${turno.giorno}`

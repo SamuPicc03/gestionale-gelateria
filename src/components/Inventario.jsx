@@ -17,7 +17,7 @@ export default function Inventario({ azienda_id, puoGestire }) {
 
   async function caricaProdotti() {
     setCaricamento(true)
-    const { data } = await supabase.from('prodotti').select('*').order('nome')
+    const { data } = await supabase.from('prodotti').select('*').eq('azienda_id', azienda_id).order('nome')
     setProdotti(data || [])
     setCaricamento(false)
   }
